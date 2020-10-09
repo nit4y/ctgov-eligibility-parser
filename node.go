@@ -1,5 +1,6 @@
 package ctgov
 
+// node is a blob struct for storing relevant parsing metadata about a line in file
 type node struct {
 	level     int
 	textStart int
@@ -7,12 +8,14 @@ type node struct {
 	htmlType
 }
 
+// newNode initiates a node instance.
 func newNode(level int) *node {
 	n := node{level: level, lineType: unkLine, htmlType: unk}
 	return &n
 }
 
-func calcNodeProps(line []byte) (lineType, int) {
+// calcNodeProps calculates relevant metadata of line
+func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 
 	var retType = unkLine
 	var start int
@@ -31,7 +34,11 @@ func calcNodeProps(line []byte) (lineType, int) {
 							continue
 						} else if cc == '.' {
 							start = i
-							retType = numberLine
+							if lastNode.lineType == emptyLine {
+								retType = numberLine
+							} else {
+								retType = textLine
+							}
 							i = j
 							break
 						} else {
@@ -45,7 +52,12 @@ func calcNodeProps(line []byte) (lineType, int) {
 				}
 			} else if c == '-' {
 				start = i
-				retType = dashLine
+				if lastNode.lineType == emptyLine {
+					retType = dashLine
+				} else {
+					retType = textLine
+				}
+
 			} else if c == '*' {
 				start = i
 				retType = commentLine
@@ -68,6 +80,7 @@ func calcNodeProps(line []byte) (lineType, int) {
 	return retType, textStart
 }
 
+// calcLevel Calculates line "level" which is the number of indentations before the actual text is.
 func calcLevel(line []byte) int {
 	counter := 0
 	for i := 0; i < len(line); i++ {
@@ -89,6 +102,5 @@ func calcHTMLType(t lineType) htmlType {
 	case dashLine:
 		return ul
 	}
-
 	return unk
 }
