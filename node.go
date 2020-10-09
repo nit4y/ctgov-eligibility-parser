@@ -1,7 +1,8 @@
 package ctgov
 
 type node struct {
-	level int
+	level     int
+	textStart int
 	lineType
 	htmlType
 }
@@ -11,7 +12,7 @@ func newNode(level int) *node {
 	return &n
 }
 
-func calcLineType(line []byte) lineType {
+func calcLineProps(line []byte) (lineType, int) {
 
 	var retType = unkLine
 	var start int
@@ -64,7 +65,7 @@ func calcLineType(line []byte) lineType {
 	} else {
 		retType = emptyLine
 	}
-	return retType
+	return retType, textStart
 }
 
 func calcLevel(line []byte) int {

@@ -31,6 +31,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		//newItem    bool
 		buffer    bytes.Buffer
 		nodeStack []*node
+		lastNode  *node
 	)
 
 	//newItem = true
@@ -38,51 +39,65 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		n := newNode(calcLevel(line))
-		n.lineType = calcLineType(line)
+		n.lineType, n.textStart = calcLineProps(line)
 		n.htmlType = calcHTMLType(n.lineType)
 
 		switch n.lineType {
 
 		case emptyLine:
-			continue
+			if lastNode != nil {
+				WriteCloseTag(htmlTypes[li], &buffer)
+			}
 
 		case textLine, commentLine:
-			continue
+			for len(nodeStack) > 0 {
+				if n.level < nodeStack[len(nodeStack)-1].level {
+					WriteCloseTag(htmlTypes[nodeStack[len(nodeStack)-1].htmlType], &buffer)
+					nodeStack = nodeStack[:len(nodeStack)-1]
+				} else {
+					buffer.WriteString(" ")
+					buffer.Write(line[n.textStart:])
+					break
+				}
+			}
 
 		case numberLine, dashLine:
 			if len(nodeStack) > 0 {
 				if n.level > nodeStack[len(nodeStack)-1].level {
 					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
 					WriteOpenTag(htmlTypes[li], &buffer)
-					buffer.WriteString(string(line))
-					//WriteCloseTag(htmlTypes[ol], &buffer)
+					buffer.Write(line[n.textStart:])
 
 				} else if n.level == nodeStack[len(nodeStack)-1].level {
 					n.htmlType = li
 					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
-					buffer.WriteString(string(line))
-					WriteCloseTag(htmlTypes[n.htmlType], &buffer)
-					//
+					buffer.Write(line[n.textStart:])
+
+					//WriteCloseTag(htmlTypes[n.htmlType], &buffer)
 
 				} else {
-					for len(nodeStack) > 0 {
+					for len(nodeStack) > 1 {
 						if n.level < nodeStack[len(nodeStack)-1].level {
 							WriteCloseTag(htmlTypes[nodeStack[len(nodeStack)-1].htmlType], &buffer)
 							nodeStack = nodeStack[:len(nodeStack)-1]
 						} else {
-							WriteOpenTag(htmlTypes[li], &buffer)
-							buffer.WriteString(string(line))
+							n.htmlType = li
+							WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+							buffer.Write(line[n.textStart:])
+
+							//WriteCloseTag(htmlTypes[n.htmlType], &buffer)
 							break
 						}
 					}
 				}
-				if n.lineType != nodeStack[len(nodeStack)-1].lineType {
+				if n.lineType != nodeStack[len(nodeStack)-1].lineType && n.lineType != textLine {
 					nodeStack = append(nodeStack, n)
 				}
 
 			}
 
 		}
+		lastNode = n
 
 	}
 	return buffer.Bytes()
