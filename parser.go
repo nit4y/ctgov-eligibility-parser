@@ -28,13 +28,11 @@ func WriteCloseTag(el string, buffer *bytes.Buffer) {
 func (pa *Parser) Parse(r io.Reader) []byte {
 	scanner := bufio.NewScanner(r)
 	var (
-		//newItem    bool
 		buffer    bytes.Buffer
 		nodeStack []*node
 		lastNode  *node
 	)
 
-	//newItem = true
 	nodeStack = append(nodeStack, newNode(0))
 	for scanner.Scan() {
 		line := scanner.Bytes()
@@ -54,8 +52,11 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				if n.level < nodeStack[len(nodeStack)-1].level {
 					WriteCloseTag(htmlTypes[nodeStack[len(nodeStack)-1].htmlType], &buffer)
 					nodeStack = nodeStack[:len(nodeStack)-1]
-				} else {
+				} else if n.level > nodeStack[len(nodeStack)-1].level {
 					buffer.WriteString(" ")
+					buffer.Write(line[n.textStart:])
+					break
+				} else {
 					buffer.Write(line[n.textStart:])
 					break
 				}
@@ -90,7 +91,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 						}
 					}
 				}
-				if n.lineType != nodeStack[len(nodeStack)-1].lineType && n.lineType != textLine {
+				if n.level > nodeStack[len(nodeStack)-1].level { //n.htmlType != nodeStack[len(nodeStack)-1].htmlType && n.lineType != textLine {
 					nodeStack = append(nodeStack, n)
 				}
 
