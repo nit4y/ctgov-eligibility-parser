@@ -12,7 +12,7 @@ func newNode(level int) *node {
 	return &n
 }
 
-func calcLineProps(line []byte) (lineType, int) {
+func calcNodeProps(line []byte) (lineType, int) {
 
 	var retType = unkLine
 	var start int

@@ -38,13 +38,13 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		n := newNode(calcLevel(line))
-		n.lineType, n.textStart = calcLineProps(line)
+		n.lineType, n.textStart = calcNodeProps(line)
 		n.htmlType = calcHTMLType(n.lineType)
 
 		switch n.lineType {
 
 		case emptyLine:
-			if lastNode != nil {
+			if lastNode.level != 0 {
 				WriteCloseTag(htmlTypes[li], &buffer)
 			}
 
