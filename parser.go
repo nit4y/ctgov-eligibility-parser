@@ -34,6 +34,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 	)
 
 	nodeStack = append(nodeStack, newNode(0))
+	lastNode = newNode(0)
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		n := newNode(calcLevel(line))
@@ -74,31 +75,29 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
 					buffer.Write(line[n.textStart:])
 
-					//WriteCloseTag(htmlTypes[n.htmlType], &buffer)
-
 				} else {
 					for len(nodeStack) > 1 {
-						if n.level < nodeStack[len(nodeStack)-1].level {
+						if n.level < nodeStack[len(nodeStack)-1].level && nodeStack[len(nodeStack)-1].level-n.level != 1 {
 							WriteCloseTag(htmlTypes[nodeStack[len(nodeStack)-1].htmlType], &buffer)
 							nodeStack = nodeStack[:len(nodeStack)-1]
 						} else {
 							n.htmlType = li
 							WriteOpenTag(htmlTypes[n.htmlType], &buffer)
 							buffer.Write(line[n.textStart:])
-
-							//WriteCloseTag(htmlTypes[n.htmlType], &buffer)
 							break
 						}
 					}
 				}
-				if n.level > nodeStack[len(nodeStack)-1].level { //n.htmlType != nodeStack[len(nodeStack)-1].htmlType && n.lineType != textLine {
+				if n.level > nodeStack[len(nodeStack)-1].level {
 					nodeStack = append(nodeStack, n)
 				}
 
 			}
 
 		}
-		lastNode = n
+		if n.lineType == numberLine || n.lineType == dashLine {
+			lastNode = n
+		}
 
 	}
 	return buffer.Bytes()

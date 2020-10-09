@@ -23,7 +23,7 @@ func calcLineProps(line []byte) (lineType, int) {
 			c := line[i]
 			if c == ' ' {
 				continue
-			} else if c >= '0' && c <= '9' {
+			} else if c >= '1' && c <= '9' {
 				if retType == unkLine { // still dont know, check to see if its number line
 					for j := i; j < len(line); j++ {
 						var cc = line[j]
