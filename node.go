@@ -34,7 +34,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 							continue
 						} else if cc == '.' {
 							start = i
-							if lastNode.lineType == emptyLine {
+							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine {
 								retType = numberLine
 							} else {
 								retType = textLine
@@ -52,7 +52,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 				}
 			} else if c == '-' {
 				start = i
-				if lastNode.lineType == emptyLine {
+				if lastNode.lineType == emptyLine || lastNode.lineType == unkLine {
 					retType = dashLine
 				} else {
 					retType = textLine
