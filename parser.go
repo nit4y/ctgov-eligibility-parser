@@ -24,18 +24,18 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		buffer         bytes.Buffer
 		treeStack      []*node
 		lastBranchNode *node
-		lastNode       *node
+		formerNode     *node
 	)
 
 	// Add empty root node
-	treeStack = append(treeStack, newNode(0))
-	lastBranchNode = newNode(0)
+	lastBranchNode = newNode(0, unkLine, unk)
+	treeStack = append(treeStack, lastBranchNode)
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
-		n := newNode(calcLevel(line)) // level is the indentation counter before text starts.
-		n.lineType, n.textStart = calcNodeProps(line, lastNode)
-		n.htmlType = calcHTMLType(n.lineType)
+		lType, textStart := calcNodeProps(line, formerNode)
+		n := newNode(calcLevel(line), lType, calcHTMLType(lType)) // level is the indentation counter before text starts.
+		n.textStart = textStart
 
 		switch n.lineType {
 
@@ -57,12 +57,13 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				} else if n.level > treeStack[len(treeStack)-1].level {
 
 					buffer.WriteString(" ")
-					buffer.Write(line[n.textStart:])
+					buffer.Write(line[n.level:])
+					treeStack = append(treeStack, n)
 					break
 
 				} else {
 
-					buffer.Write(line[n.textStart:])
+					buffer.Write(line[n.level:])
 					break
 
 				}
@@ -113,7 +114,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		if n.lineType == numberLine || n.lineType == dashLine {
 			lastBranchNode = n
 		}
-		lastNode = n
+		formerNode = n
 	}
 	return buffer.Bytes()
 }

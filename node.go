@@ -9,8 +9,8 @@ type node struct {
 }
 
 // newNode initiates a node instance.
-func newNode(level int) *node {
-	n := node{level: level, lineType: unkLine, htmlType: unk}
+func newNode(level int, t lineType, hType htmlType) *node {
+	n := node{level: level, lineType: t, htmlType: hType}
 	return &n
 }
 
