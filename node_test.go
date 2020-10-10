@@ -33,8 +33,8 @@ func TestCalcNodeProps(t *testing.T) {
 	}{
 		{[]byte("  3. Prior Treatment"), newNode(0, emptyLine, unk), numberLine, 5},
 		{[]byte("       - Prior Treatment"), newNode(0, emptyLine, unk), dashLine, 9},
-		{[]byte("  3. Prior Treatment"), newNode(0, unkLine, unk), textLine, 5},
-		{[]byte("       - Prior Treatment"), newNode(0, unkLine, unk), textLine, 9},
+		{[]byte("  3. Prior Treatment"), newNode(0, textLine, unk), textLine, 5},
+		{[]byte("       - Prior Treatment"), newNode(0, textLine, unk), textLine, 9},
 		{[]byte("Prior Treatment"), newNode(0, emptyLine, unk), textLine, 0},
 		{[]byte("2 Prior Treatments"), newNode(0, emptyLine, unk), textLine, 2},
 		{[]byte("-Prior Treatment"), newNode(0, emptyLine, unk), textLine, 1},
