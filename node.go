@@ -14,7 +14,7 @@ func newNode(level int, t lineType, hType htmlType) *node {
 	return &n
 }
 
-// calcNodeProps calculates relevant metadata of line
+// calcNodeProps calculates relevant parsing metadata of line
 func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 
 	var retType = unkLine
@@ -80,7 +80,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 	return retType, textStart
 }
 
-// calcLevel Calculates line "level" which is the number of indentations before the actual text is.
+// calcLevel determines line "level" which is the number of indentations before the actual text is.
 func calcLevel(line []byte) int {
 	counter := 0
 	for i := 0; i < len(line); i++ {
@@ -95,6 +95,7 @@ func calcLevel(line []byte) int {
 	return counter
 }
 
+// calcHTMLType determines html tag of input line with lineType t.
 func calcHTMLType(t lineType) htmlType {
 	switch t {
 	case numberLine:
