@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"reflect"
 )
 
 // Parser type decleration
@@ -13,6 +14,22 @@ type Parser struct {
 // NewParser initiates a Parser instance (struct).
 func NewParser() *Parser {
 	return &Parser{}
+}
+
+func itemExists(slice interface{}, item interface{}) bool {
+	s := reflect.ValueOf(slice)
+
+	if s.Kind() != reflect.Slice {
+		panic("Invalid data-type")
+	}
+
+	for i := 0; i < s.Len(); i++ {
+		if s.Index(i).Interface() == item {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Parse iterates over ctgov criteria section, builds html presentation of that data and returns as buffer.
@@ -38,8 +55,9 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 		switch n.lineType {
 		case emptyLine:
-			if formerNode.lineType != unkLine && formerNode.htmlType != unk { // making sure its not the first line
-				WriteCloseTag(htmlTypes[li], &buffer)
+			if itemExists([]lineType{numberLine, dashLine}, formerNode.lineType) ||
+				formerNode.lineType == textLine && formerNode.textStart == treeStack[len(treeStack)-1].textStart { // making sure its not the first line
+				WriteCloseTag(htmlTypes[n.htmlType], &buffer)
 			}
 
 		case textLine, commentLine:
@@ -47,11 +65,6 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				if n.level < treeStack[len(treeStack)-1].level {
 					WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
 					treeStack = treeStack[:len(treeStack)-1]
-
-				} else if n.level > treeStack[len(treeStack)-1].level {
-					buffer.WriteString(" ")
-					buffer.Write(line[n.level:])
-					break
 
 				} else {
 					buffer.WriteString(" ")
@@ -99,5 +112,11 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		}
 		formerNode = n
 	}
+	// Close all open html tags.
+	for len(treeStack) > 1 {
+		WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+		treeStack = treeStack[:len(treeStack)-1]
+	}
+
 	return buffer.Bytes()
 }

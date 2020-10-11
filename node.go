@@ -102,6 +102,8 @@ func calcHTMLType(t lineType) htmlType {
 		return ol
 	case dashLine:
 		return ul
+	case emptyLine:
+		return li
 	}
 	return unk
 }
