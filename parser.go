@@ -38,7 +38,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 		switch n.lineType {
 		case emptyLine:
-			if formerNode != newNode(0, unkLine, unk) { // making sure its not the first line
+			if formerNode.lineType != unkLine && formerNode.htmlType != unk { // making sure its not the first line
 				WriteCloseTag(htmlTypes[li], &buffer)
 			}
 
@@ -64,7 +64,11 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		case numberLine, dashLine:
 			if len(treeStack) > 0 {
 				if n.level > treeStack[len(treeStack)-1].level {
-					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+					if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine {
+						WriteOpenTag("ol type=\"a\"", &buffer)
+					} else {
+						WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+					}
 					WriteOpenTag(htmlTypes[li], &buffer)
 					buffer.Write(line[n.textStart:]) // write data only after indentation and node numbering
 
