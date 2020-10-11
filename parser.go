@@ -51,7 +51,6 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				} else if n.level > treeStack[len(treeStack)-1].level {
 					buffer.WriteString(" ")
 					buffer.Write(line[n.level:])
-					treeStack = append(treeStack, n)
 					break
 
 				} else {
