@@ -14,7 +14,7 @@ func TestItemExists(t *testing.T) {
 		{[]interface{}{"This", "is", "a", "test"}, "is", true},
 		{[]interface{}{"This", "is", "a", "test"}, "tes", false},
 		{[]interface{}{1, 2, 3, 4, 5}, 1, true},
-		{[]interface{}{1, 2, 3, 4, 5}, 6, true},
+		{[]interface{}{1, 2, 3, 4, 5}, 6, false},
 	}
 	for _, test := range tests {
 		ret := itemExists(test.slice, test.item)
