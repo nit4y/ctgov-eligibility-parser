@@ -18,17 +18,14 @@ func NewParser() *Parser {
 
 func itemExists(slice interface{}, item interface{}) bool {
 	s := reflect.ValueOf(slice)
-
 	if s.Kind() != reflect.Slice {
-		panic("Invalid data-type")
+		panic("Slice data type is diffrent from item data type.")
 	}
-
 	for i := 0; i < s.Len(); i++ {
 		if s.Index(i).Interface() == item {
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -75,40 +72,42 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 			}
 
 		case numberLine, dashLine:
-			if len(treeStack) > 0 {
-				if n.level > treeStack[len(treeStack)-1].level {
-					if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine {
-						WriteOpenTag("ol type=\"a\"", &buffer)
-					} else {
-						WriteOpenTag(htmlTypes[n.htmlType], &buffer)
-					}
-					WriteOpenTag(htmlTypes[li], &buffer)
-					buffer.Write(line[n.textStart:]) // write data only after indentation and node numbering
-
-				} else if n.level == treeStack[len(treeStack)-1].level {
-					n.htmlType = li
-					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
-					buffer.Write(line[n.textStart:])
+			if n.level > treeStack[len(treeStack)-1].level {
+				// indent forward
+				if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine {
+					WriteOpenTag("ol type=\"a\"", &buffer)
 
 				} else {
-					for len(treeStack) > 1 {
-						if n.level < treeStack[len(treeStack)-1].level &&
-							treeStack[len(treeStack)-1].level-n.level != 1 { // second condition prevents common anomaly when numbering exceeds 9.
-							WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
-							treeStack = treeStack[:len(treeStack)-1]
+					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+				}
+				WriteOpenTag(htmlTypes[li], &buffer)
+				buffer.Write(line[n.textStart:]) // write data only after indentation and node numbering
 
-						} else {
-							n.htmlType = li
-							WriteOpenTag(htmlTypes[n.htmlType], &buffer)
-							buffer.Write(line[n.textStart:])
-							break
-						}
+			} else if n.level == treeStack[len(treeStack)-1].level {
+				n.htmlType = li
+				WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+				buffer.Write(line[n.textStart:])
+
+			} else {
+				// indent backwards
+				for len(treeStack) > 1 {
+					if n.level < treeStack[len(treeStack)-1].level &&
+						treeStack[len(treeStack)-1].level-n.level != 1 { // second condition prevents common anomaly when numbering exceeds 9.
+						WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+						treeStack = treeStack[:len(treeStack)-1]
+
+					} else {
+						n.htmlType = li
+						WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+						buffer.Write(line[n.textStart:])
+						break
 					}
 				}
-				if n.level > treeStack[len(treeStack)-1].level {
-					treeStack = append(treeStack, n)
-				}
 			}
+			if n.level > treeStack[len(treeStack)-1].level {
+				treeStack = append(treeStack, n)
+			}
+
 		}
 		formerNode = n
 	}
