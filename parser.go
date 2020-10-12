@@ -64,8 +64,14 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 					treeStack = treeStack[:len(treeStack)-1]
 
 				} else {
-					buffer.WriteString(" ")
-					buffer.Write(line[n.level:]) // write from level because a text line might start with numbering or dash.
+					if len(treeStack) == 1 {
+						WriteOpenTag(htmlTypes[p], &buffer)
+						buffer.Write(line[n.level:])
+						WriteCloseTag(htmlTypes[p], &buffer)
+					} else {
+						buffer.WriteString(" ")
+						buffer.Write(line[n.level:]) // write from level because a text line might start with numbering or dash.
+					}
 					break
 
 				}
