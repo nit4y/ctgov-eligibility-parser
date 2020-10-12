@@ -2,24 +2,46 @@
 
 How to install
     
-    1. In ctgov package folder: "go install"
+1. In ctgov package folder: "go install"
 
-    2. Should now be available for import.
+2. Should now be available for import.
+
+
+Usage example:
+    s :=
+        `        Inclusion Criteria:
+
+            -  Chinese-speaking;
+
+            -  Individuals aged 18 years and above;
+
+            -  No history of diagnosed mental illness;
+
+            -  Access to an internet-connected computer.
+
+        Exclusion Criteria:
+
+            -  Individuals who cannot meet the inclusion criteria.`
+    p := ctgov.NewParser()
+    st := strings.NewReader(s)
+    ret := p.Parse(st)
+    fmt.Print(string(ret))
+
 
 Parser flow (macro):
 
-    1. Reads line by line from input buffer.
+1. Reads line by line from input buffer.
 
-    2. Creates a node instance and stores in it relevant data for parsing the line.
+2. Creates a node instance and stores in it relevant data for parsing the line.
 
-    3. For each node, creates elements and html lists as for line indentation, considering the last opened list, and the former node.
+3. For each node, creates html lists and elements considering line indentation in compare to last node in stack (parent) and the former node.
 
-        - If text is indented forward, open tag for another list and write text as a new item.
+    - If line is indented forward, open tag for another list and write text as a new item.
 
-                - Add node to stack.
+        - Add node to stack.
 
-        - If text is indented backwards, close tags of every node in stack, and pop items from stack until indentation is the same.
+    - If line is indented backwards, close tags of every node in stack, and pop items from stack until indentation is the same.
 
-        - if text is indented the same, write text as a item in this list.
+    - if line is indented the same, write text as a item in this list.
 
-    5. Finally, closes all open tags left in stack.
+5. Finally, closes all open tags left in stack.
