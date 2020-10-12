@@ -61,7 +61,7 @@ func TestParse(t *testing.T) {
              transplantation.
 
 		  -  Diagnosis of chronic liver disease.
-`, " Inclusion Criteria:<ul><li>Agreement to avoid pregnancy or fathering children.</li></ul> Exclusion Criteria:<ul><li>Any prior allogeneic stem cell transplantation or a candidate for such transplantation.</li><li>Diagnosis of chronic liver disease.</ul>",
+`, "<p>Inclusion Criteria:</p><ul><li>Agreement to avoid pregnancy or fathering children.</li></ul><p>Exclusion Criteria:</p><ul><li>Any prior allogeneic stem cell transplantation or a candidate for such transplantation.</li><li>Diagnosis of chronic liver disease.</ul>",
 		},
 	}
 	for _, test := range tests {
