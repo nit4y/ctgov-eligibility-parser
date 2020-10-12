@@ -2,8 +2,9 @@ package ctgov
 
 // node is a blob struct for storing relevant parsing metadata about a line in file
 type node struct {
-	level     int
-	textStart int
+	level       int // number of and tabs before line (space counts as 1, tab as 4)
+	actualStart int // number of characters before the first non space and non tab character.
+	textStart   int // actualStart + numbering / dashing characters
 	lineType
 	htmlType
 }
@@ -24,7 +25,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 	if len(line) > 0 {
 		for i := 0; i < len(line); i++ {
 			c := line[i]
-			if c == ' ' {
+			if c == ' ' || c == '\t' {
 				continue
 			} else if c >= '1' && c <= '9' {
 				if retType == unkLine { // still dont know, check to see if its number line
