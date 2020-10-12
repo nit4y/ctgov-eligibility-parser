@@ -6,20 +6,20 @@ How to install
 
     2. Should now be available for import.
 
-Parser flow:
+Parser flow (macro):
 
-    1. Reads line by line a buffer.
+    1. Reads line by line from input buffer.
 
-    2. Creates a node instance that is relevant data for parsing the line.
+    2. Creates a node instance and stores in it relevant data for parsing the line.
 
-    3. For each node, creates elements and html lists as for line indentation.
+    3. For each node, creates elements and html lists as for line indentation, considering the last opened list, and the former node.
 
         - If text is indented forward, open tag for another list and write text as a new item.
 
-        - If text is indented backwards, close tags of every parent node in stack, and pop items from stack until indentation is corrent.
+                - Add node to stack.
 
-        - if text is indented the same, write text as a list item.
+        - If text is indented backwards, close tags of every node in stack, and pop items from stack until indentation is the same.
 
-    4. Inserts tree structure "parent" nodes only to a stack.
+        - if text is indented the same, write text as a item in this list.
 
     5. Finally, closes all open tags left in stack.

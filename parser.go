@@ -65,7 +65,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 				} else {
 					buffer.WriteString(" ")
-					buffer.Write(line[n.level:])
+					buffer.Write(line[n.level:]) // write from level because a text line might start with numbering or dash.
 					break
 
 				}
