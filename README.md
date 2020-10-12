@@ -6,13 +6,11 @@
 
 2. Should now be available for import.
 
-
 ## Usage example:
     p := ctgov.NewParser()
     ctString := strings.NewReader("some ct gov criteria")
     ret := p.Parse(st)
     fmt.Print(string(ret))
-
 
 ## Parser flow (macro):
 
@@ -31,3 +29,5 @@
     - if line is indented the same, write text as a item in this list.
 
 5. Finally, closes all open tags left in stack.
+
+Note: parser relies on that every two line is seperated with an empty line.
