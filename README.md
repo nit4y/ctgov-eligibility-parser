@@ -9,7 +9,7 @@
 ## Usage example:
     p := ctgov.NewParser()
     ctString := strings.NewReader("some ct gov criteria")
-    ret := p.Parse(st)
+    ret := p.Parse(ctString)
     fmt.Print(string(ret))
 
 ## Parser flow (macro):
