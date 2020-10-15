@@ -58,7 +58,9 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 				} else if retType == dashLine || retType == commentLine { // already know, quit
 					textStart = i
 					break
+					
 				}
+
 			} else if c == '-' {
 				start = i
 				if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a dash
