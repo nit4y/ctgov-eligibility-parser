@@ -31,5 +31,4 @@ var htmlTypes = []string{
 	"li",
 	"ol",
 	"p",
-	"ol type=\"i\"",
 }

@@ -92,8 +92,8 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				writeOpenTag(htmlTypes[li], &buffer)
 				buffer.Write(line[n.textStart:]) // write text found only after indentation and node numbering
 
-			} else if n.level == treeStack[len(treeStack)-1].level { // text is indented the same, write line as a item in current open list.
-
+			} else if n.level == treeStack[len(treeStack)-1].level { // text is indented the same
+				// write line as a item in current open list.
 				n.htmlType = li
 				writeOpenTag(htmlTypes[n.htmlType], &buffer)
 				buffer.Write(line[n.textStart:])
