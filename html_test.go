@@ -16,7 +16,7 @@ func TestWriteOpenTag(t *testing.T) {
 	}
 	for _, test := range tests {
 		var buffer bytes.Buffer
-		WriteOpenTag(test.el, &buffer)
+		writeOpenTag(test.el, &buffer)
 		if buffer.String() != test.testOpen {
 			t.Errorf("Bad writing to buffer, got: %s, should be: %s.", buffer.String(), test.testOpen)
 		}
@@ -34,7 +34,7 @@ func TestWriteCloseTag(t *testing.T) {
 	}
 	for _, test := range tests {
 		var buffer bytes.Buffer
-		WriteCloseTag(test.el, &buffer)
+		writeCloseTag(test.el, &buffer)
 		if buffer.String() != test.testClose {
 			t.Errorf("Bad writing to buffer, got: %s, should be: %s.", buffer.String(), test.testClose)
 		}

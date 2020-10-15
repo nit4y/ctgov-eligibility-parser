@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"reflect"
 )
 
 // Parser type decleration
@@ -16,24 +15,11 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-func itemExists(slice interface{}, item interface{}) bool {
-	s := reflect.ValueOf(slice)
-	if s.Kind() != reflect.Slice {
-		panic("Slice data type is diffrent from item data type.")
-	}
-	for i := 0; i < s.Len(); i++ {
-		if s.Index(i).Interface() == item {
-			return true
-		}
-	}
-	return false
-}
-
 // Parse iterates over ctgov criteria section, builds html presentation of that data and returns as buffer.
 // HTML output structure consists of indentation and small irregularities found during testing.
 // The tree is built along the way while the tree stack is managed dynamicly.
 func (pa *Parser) Parse(r io.Reader) []byte {
-	scanner := bufio.NewScanner(r)
+
 	var (
 		buffer     bytes.Buffer
 		treeStack  []*node
@@ -44,6 +30,8 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 	formerNode = newNode(0, unkLine, unk)
 	treeStack = append(treeStack, formerNode)
 
+	scanner := bufio.NewScanner(r)
+
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		lType, textStart := calcNodeProps(line, formerNode)
@@ -51,75 +39,98 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		n.textStart = textStart
 
 		switch n.lineType {
+
 		case emptyLine:
-			if itemExists([]lineType{numberLine, dashLine}, formerNode.lineType) ||
+
+			if formerNode.lineType == numberLine || formerNode.lineType == dashLine ||
 				formerNode.lineType == textLine && formerNode.textStart == treeStack[len(treeStack)-1].textStart { // making sure its not the first line
-				WriteCloseTag(htmlTypes[n.htmlType], &buffer)
+				writeCloseTag(htmlTypes[n.htmlType], &buffer)
 			}
 
 		case textLine, commentLine:
-			for len(treeStack) > 0 {
-				if n.level < treeStack[len(treeStack)-1].level {
-					WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+
+			for len(treeStack) > 0 { // while stack still contains nodes
+
+				if n.level < treeStack[len(treeStack)-1].level { // if text is indented backwards, close node tag and pop from stack
+					writeCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
 					treeStack = treeStack[:len(treeStack)-1]
 
 				} else {
-					if len(treeStack) == 1 {
-						WriteOpenTag(htmlTypes[p], &buffer)
-						buffer.Write(line[n.level:])
-						WriteCloseTag(htmlTypes[p], &buffer)
+
+					if len(treeStack) == 1 { // if only root node found in stack, the line is a header text line, preventing root node pop
+						writeOpenTag(htmlTypes[p], &buffer)
+						buffer.Write(line[n.level:]) // write from level instead of textStart because a text line might start with numbering or dash.
+						writeCloseTag(htmlTypes[p], &buffer)
+
 					} else {
-						buffer.WriteString(" ")
-						buffer.Write(line[n.level:]) // write from level because a text line might start with numbering or dash.
+						if n.lineType == commentLine {
+							buffer.WriteString("<br>") // comment lines appear below items. br = line break
+						} else {
+							buffer.WriteString(" ") // all other data appear inline.
+						}
+
+						buffer.Write(line[n.level:])
 					}
+
 					break
 
 				}
 			}
 
 		case numberLine, dashLine:
+
 			if n.level > treeStack[len(treeStack)-1].level {
 				// indent forward
+				// in every second consecutive numbering indent, make the ol element an "a, b, c" ordered list.
 				if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine {
-					WriteOpenTag("ol type=\"a\"", &buffer)
+					writeOpenTag("ol type=\"a\"", &buffer)
 
 				} else {
-					WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+					writeOpenTag(htmlTypes[n.htmlType], &buffer)
 				}
-				WriteOpenTag(htmlTypes[li], &buffer)
-				buffer.Write(line[n.textStart:]) // write data only after indentation and node numbering
 
-			} else if n.level == treeStack[len(treeStack)-1].level {
+				writeOpenTag(htmlTypes[li], &buffer)
+				buffer.Write(line[n.textStart:]) // write text found only after indentation and node numbering
+
+			} else if n.level == treeStack[len(treeStack)-1].level { // text is indented the same, write line as a item in current open list.
+
 				n.htmlType = li
-				WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+				writeOpenTag(htmlTypes[n.htmlType], &buffer)
 				buffer.Write(line[n.textStart:])
 
-			} else {
-				// indent backwards
-				for len(treeStack) > 1 {
+			} else { // has lower level, indent backwards
+
+				for len(treeStack) > 1 { // continue popping items until reaching first parent node (lowest level possible), meant to prevent popping of root node
+
 					if n.level < treeStack[len(treeStack)-1].level &&
 						treeStack[len(treeStack)-1].level-n.level != 1 { // second condition prevents common anomaly when numbering exceeds 9.
-						WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+						writeCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
 						treeStack = treeStack[:len(treeStack)-1]
 
-					} else {
+					} else { // reached back to correct level, write item in list.
 						n.htmlType = li
-						WriteOpenTag(htmlTypes[n.htmlType], &buffer)
+						writeOpenTag(htmlTypes[n.htmlType], &buffer)
 						buffer.Write(line[n.textStart:])
+
 						break
 					}
+
 				}
+
 			}
-			if n.level > treeStack[len(treeStack)-1].level {
+
+			if n.level > treeStack[len(treeStack)-1].level { // only parent nodes are needed in stack
 				treeStack = append(treeStack, n)
 			}
 
 		}
+
 		formerNode = n
+
 	}
 	// Close all open html tags.
 	for len(treeStack) > 1 {
-		WriteCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+		writeCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
 		treeStack = treeStack[:len(treeStack)-1]
 	}
 

@@ -2,9 +2,8 @@ package ctgov
 
 // node is a blob struct for storing relevant parsing metadata about a line in file
 type node struct {
-	level       int // number of and tabs before line (space counts as 1, tab as 4)
-	actualStart int // number of characters before the first non space and non tab character.
-	textStart   int // actualStart + numbering / dashing characters
+	level     int // number of and tabs before line (space counts as 1, tab as 4)
+	textStart int // actualStart + numbering / dashing characters
 	lineType
 	htmlType
 }
@@ -25,7 +24,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 	if len(line) > 0 {
 		for i := 0; i < len(line); i++ {
 			c := line[i]
-			if c == ' ' || c == '\t' {
+			if c == ' ' || c == '\t' { // tabs may appear as indentation as well
 				continue
 			} else if c >= '1' && c <= '9' {
 				if retType == unkLine { // still dont know, check to see if its number line
@@ -35,7 +34,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 							continue
 						} else if cc == '.' {
 							start = i
-							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine {
+							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a numbering
 								retType = numberLine
 							} else {
 								retType = textLine
@@ -53,7 +52,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 				}
 			} else if c == '-' {
 				start = i
-				if lastNode.lineType == emptyLine || lastNode.lineType == unkLine {
+				if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a dash
 					retType = dashLine
 				} else {
 					retType = textLine
@@ -86,7 +85,7 @@ func calcLevel(line []byte) int {
 	counter := 0
 	for i := 0; i < len(line); i++ {
 		if line[i] == '\t' {
-			counter = counter + 4
+			counter = counter + 4 // tabs are equal to 4 spaces in terms of indention.
 		} else if line[i] == ' ' {
 			counter = counter + 1
 		} else {
@@ -99,12 +98,17 @@ func calcLevel(line []byte) int {
 // calcHTMLType determines html tag of input line with lineType t.
 func calcHTMLType(t lineType) htmlType {
 	switch t {
+
 	case numberLine:
 		return ol
+
 	case dashLine:
 		return ul
+
 	case emptyLine:
 		return li
+
 	}
+
 	return unk
 }
