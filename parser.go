@@ -44,7 +44,29 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 			if formerNode.lineType == numberLine || formerNode.lineType == dashLine ||
 				formerNode.lineType == textLine && formerNode.textStart == treeStack[len(treeStack)-1].textStart { // making sure its not the first line
-				writeCloseTag(htmlTypes[n.htmlType], &buffer)
+
+				if formerNode.level == treeStack[len(treeStack)-1].level && treeStack[len(treeStack)-1].htmlType == p { // close p tag only if it is a paragraph
+
+					writeCloseTag(htmlTypes[p], &buffer)
+
+					treeStack = treeStack[:len(treeStack)-1]
+
+					if treeStack[len(treeStack)-1].lineType == numberLine &&
+						formerNode.level <= treeStack[len(treeStack)-1].level ||
+						treeStack[len(treeStack)-1].lineType == dashLine &&
+							formerNode.level <= treeStack[len(treeStack)-1].level { // if paragraph is a part of a list item, close list tags properly as well.
+
+						writeCloseTag(htmlTypes[li], &buffer)
+						writeCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
+
+						treeStack = treeStack[:len(treeStack)-1]
+
+					}
+
+				} else {
+					writeCloseTag(htmlTypes[n.htmlType], &buffer)
+				}
+
 			}
 
 		case textLine, commentLine:
@@ -57,10 +79,10 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 				} else {
 
-					if len(treeStack) == 1 { // if only root node found in stack, the line is a header text line, preventing root node pop
-						writeOpenTag(htmlTypes[p], &buffer)
-						buffer.Write(line[n.level:]) // write from level instead of textStart because a text line might start with numbering or dash.
-						writeCloseTag(htmlTypes[p], &buffer)
+					if len(treeStack) == 1 || formerNode.lineType == emptyLine { // if only root node found in stack, the line is a header text line, preventing root node pop
+						n.htmlType = p
+						writeOpenTag(htmlTypes[n.htmlType], &buffer)
+						treeStack = append(treeStack, n)
 
 					} else {
 						if n.lineType == commentLine {
@@ -69,8 +91,9 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 							buffer.WriteString(" ") // all other data appear inline.
 						}
 
-						buffer.Write(line[n.level:])
 					}
+
+					buffer.Write(line[n.level:]) // write from level instead of textStart because a text line might start with numbering or dash.
 
 					break
 
@@ -129,6 +152,12 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 	}
 	// Close all open html tags.
+	// closing open li tag if present
+	if treeStack[len(treeStack)-1].lineType == numberLine || treeStack[len(treeStack)-1].lineType == dashLine {
+		writeCloseTag(htmlTypes[li], &buffer)
+	}
+
+	// closing ol, ul open tags if present
 	for len(treeStack) > 1 {
 		writeCloseTag(htmlTypes[treeStack[len(treeStack)-1].htmlType], &buffer)
 		treeStack = treeStack[:len(treeStack)-1]
