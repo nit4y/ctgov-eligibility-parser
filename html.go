@@ -1,64 +1,17 @@
 package ctgov
 
-import (
-	"bytes"
-)
+import "bytes"
 
-func sanitize(c content) []byte {
-
-	if c.textStart != c.start {
-		from := c.textStart
-		to := len(c.line)
-
-		return c.line[from:to]
-
-	}
-
-	return c.line
-
-}
-
-func generateEl(n node, buffer *bytes.Buffer) {
-
-	el := getHtmlTag(n.htmlType)
-
-	//start
+// writeOpenTag writes to buffer the opening html tag el as syntax should be.
+func writeOpenTag(el string, buffer *bytes.Buffer) {
 	buffer.WriteString("<")
 	buffer.WriteString(el)
 	buffer.WriteString(">")
+}
 
-	if n.htmlType == co {
-		buffer.WriteString("* ")
-	}
-
-	for i := range n.contents {
-		c := n.contents[i]
-		// sanitize
-		txt := sanitize(c)
-		buffer.Write(txt)
-	}
-
-	for i := range n.children {
-		child := n.children[i]
-		generateEl(child, buffer)
-	}
-
-	// end
+// writeCloseTag writes to buffer the closing html tag el as syntax should be.
+func writeCloseTag(el string, buffer *bytes.Buffer) {
 	buffer.WriteString("</")
 	buffer.WriteString(el)
 	buffer.WriteString(">")
-
-}
-
-func generateHtml(nodes []node) []byte {
-
-	buffer := bytes.Buffer{}
-
-	for i := range nodes {
-		n := nodes[i]
-		generateEl(n, &buffer)
-
-	}
-
-	return buffer.Bytes()
 }

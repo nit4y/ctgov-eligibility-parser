@@ -1,74 +1,137 @@
 package ctgov
 
+// node is a blob struct for storing relevant parsing metadata about a line in file
 type node struct {
-	lineType lineType
-	htmlType htmlType
-	idx      int
-	closed   bool
-	content
-
-	contents []content
-	children []node
+	level     int // number of and tabs before line (space counts as 1, tab as 4)
+	textStart int // actualStart + numbering / dashing characters
+	lineType
+	htmlType
 }
 
-func parseLine(line []byte) node {
+// newNode initiates a node instance.
+func newNode(level int, t lineType, hType htmlType) *node {
+	n := node{level: level, lineType: t, htmlType: hType}
+	return &n
+}
 
-	n := node{
-		lineType: unkLine,
-		htmlType: unk,
-	}
+// calcNodeProps calculates relevant parsing metadata of line
+func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 
-	n.line = make([]byte, len(line))
-	copy(n.line, line)
+	var retType = unkLine
+	var start int
+	var textStart int
 
 	if len(line) > 0 {
 		for i := 0; i < len(line); i++ {
 			c := line[i]
-			if c == ' ' {
+
+			if c == ' ' || c == '\t' { // tabs may appear as indentation as well
 				continue
-			} else if c >= '0' && c <= '9' {
-				if n.lineType == unkLine { // still dont know, check to see if its number line
+
+			} else if c >= '1' && c <= '9' {
+				if retType == unkLine { // still dont know, check to see if its number line
 					for j := i; j < len(line); j++ {
 						var cc = line[j]
+
 						if cc >= '0' && cc <= '9' {
 							continue
+
 						} else if cc == '.' {
-							n.start = i
-							n.lineType = numberLine
+							start = i
+							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a numbering
+								retType = numberLine
+							} else {
+								retType = textLine
+							}
 							i = j
+
 							break
+
 						} else {
 							i = j
+
 							break
+
 						}
 					}
-				} else if n.lineType == dashLine || n.lineType == commentLine { // already know, quit
-					n.textStart = i
+
+				} else if retType == dashLine || retType == commentLine { // already know, quit
+					textStart = i
 					break
+
 				}
+
 			} else if c == '-' {
-				n.start = i
-				n.lineType = dashLine
+				start = i
+				if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a dash
+					retType = dashLine
+				} else {
+					retType = textLine
+				}
+
 			} else if c == '*' {
-				n.start = i
-				n.lineType = commentLine
+				start = i
+				retType = commentLine
+
 			} else { // found text somewhere down the road
 
-				if n.start == 0 { // first time
-					n.start = i
+				if start == 0 { // first time
+					start = i
 				}
 
-				n.textStart = i
-				if n.start == n.textStart { // text == start -> this is a text line
-					n.lineType = textLine
+				textStart = i
+
+				if start == textStart { // text == start -> this is a text line
+					retType = textLine
 				}
+
 				break
 			}
 		}
+
 	} else {
-		n.lineType = emptyLine
+		retType = emptyLine
 	}
 
-	return n
+	return retType, textStart
+}
 
+// calcLevel determines line "level" which is the number of indentations before the actual text is.
+func calcLevel(line []byte) int {
+
+	counter := 0
+
+	for i := 0; i < len(line); i++ {
+
+		if line[i] == '\t' {
+			counter = counter + 4 // tabs are equal to 4 spaces in terms of indention.
+
+		} else if line[i] == ' ' {
+			counter = counter + 1
+
+		} else {
+			break
+
+		}
+	}
+
+	return counter
+}
+
+// calcHTMLType determines html tag of input line with lineType t.
+func calcHTMLType(t lineType) htmlType {
+	switch t {
+
+	case numberLine:
+		return ol
+
+	case dashLine:
+		return ul
+
+	case emptyLine:
+		return li
+
+	}
+
+	return unk
 }
