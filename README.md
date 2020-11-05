@@ -9,8 +9,11 @@
 ## Usage example:
     p := ctgov.NewParser()
     ctString := strings.NewReader("some ct gov criteria")
-    ret := p.Parse(ctString)
-    fmt.Print(string(ret))
+    ret, err := p.Parse(ctString)
+    if ret != nil {
+        fmt.Print(string(ret))
+    }
+    
 
 ## Parser flow (macro):
 
@@ -28,6 +31,6 @@
 
     - if line is indented the same, write text as a item in this list.
 
-5. Finally, closes all open tags left in stack.
+5. Finally, close all open tags left in stack.
 
 Note: parser relies on that every two line is seperated with an empty line.

@@ -16,9 +16,15 @@ func TestParse(t *testing.T) {
 	for _, test := range tests {
 		p := NewParser()
 		st := strings.NewReader(test.input)
-		ret := p.Parse(st)
-		if string(ret) != test.output {
-			t.Errorf("Parsing output is wrong in test %d. Please test output with browser. Test number:", counter)
+		ret, err := p.Parse(st)
+		if err == nil {
+			if string(ret) != test.output {
+				t.Errorf("Parsing output is wrong in test %d. Please test output with browser.", counter)
+			}
+		} else {
+			if err.Error() != test.output {
+				t.Errorf("Parsing output is wrong in test %d. Please test output with browser.", counter)
+			}
 		}
 		counter = counter + 1
 	}
@@ -435,7 +441,7 @@ func getParseTests() []sample {
         be considered as no childbearing potential only after confirmation by hormone levels.
 `, "<p>Inclusion Criteria:</p><ul><li>        -</li><p>Patients eligible for inclusion in this study have to meet all of the following criteria:</p></li></ul><ol><li>Provide informed consent voluntarily.</li><li>Male and female patients ≥ 18 years of age (or having reached the age of majority according to local laws and regulations, if the age is &gt; 18 years).</li><li>Patients with advanced solid tumor who have failed at least one line of prior systemic therapy or for whom standard therapy do not exist and meet the following eligibility for the corresponding part of the study:</li><ol type=\"a\"><li>Patient must have a histologically or cytologically confirmed diagnosis of advanced recurrent or metastatic solid tumor.</li><li>At least one measurable lesion as per RECIST 1.1. (Ovarian cancer participants must have measurable disease by RECIST 1.1 criteria or evaluable cancer via CA125 GCIG criteria; Prostate cancer participants must have measurable disease by RECIST 1.1 criteria or evaluable cancer via PSA response).</li><li>Population eligibility:</li><p>• Patients eligible for Part 1 dose escalation: Advanced solid tumors with any DDR gene 1) or PIK3CA 2) mutation who have failed or cannot tolerate standard treatment or currently have no standard treatment.</p><p>Note:</p><ol type=\"a\"><li>DDRa panel: BRCA1, BRCA2, ATM, CDK12, CHEK1, CHEK2, BARD1, BRIP1, FANCL, PALB2, PPP2R2A, RAD51B, RAD51C, RAD51D, RAD54L.</li><li>PIK3CA hotspot mutation: E545X, H1047X, or E542K. For the gene mutation testing result either tumor tissue samples or circulating free tumor DNA (ctDNA) test can be accppted.</li><p>• Patients eligible for Part 2 dose expansion:</p><ul><li>Cohort 1: Advanced solid tumors with any selected DDR3) gene mutation</li><li>Cohort 2: Advanced solid tumors with PIK3CA hotspot mutation (E545X, H1047X, E542K).<ul><li>Cohort 3: Advanced high grade serous ovarian, fallopian tube or primary peritoneal cancer patients with acquired PARP inhibitor resistance4)</li><li>Cohort 4: Advanced solid tumors with any selected DDR3) gene mutation with acquired PARP inhibitor resistance4) .</li><li>Cohort 5: Platinum resistant/refractory5) recurrent high grade serous ovarian, fallopian tube, or primary peritoneal cancer.</li></ul><p>Note:</p></li></ul><li>DDRb panel: BRCA1, BRCA2, BARD1, BRIP1, FANCL, PALB2, PPP2R2A, RAD51B, RAD51C, RAD51D, RAD54L. For the gene mutation testing result either tumor tissue samples or circulating free tumor DNA (ctDNA) test can be accepted</li><li>Acquired resistance to prior PARP inhibitor (PARPi) is defined meeting the following criteria: - Patients with advanced solid tumor, with progression on PARPi therapy prior trial consent - Patients should have responded to their prior PARPi therapy (radiology evaluation SD&gt;4months, or CR/PR). - Patients must not have received another antitumor therapy between stopping their previous PARPi therapy and initiating therapy on this trial - Patients must be off prior PARPi for at least 3 weeks or 5 half-lives, whichever is shorter.&quot; -</li><li>Platinum refractory or resistance is defined meeting the following criteria:</li><ul><li>Platinum refractory is defined as either relapse less than 2 months after the last platinum-based therapy or relapse during platinum therapy.</li><li>Platinum-resistance is defined as relapse within 2 to 6 months after last dose of platinum-based chemotherapy</li></ul></ol></ol><li>Availability of tumor tissue sample (either fresh tumor biopsy or archival tumor tissue sample) or blood samples.</li><li>Eastern Cooperative Oncology Group (ECOG) performance status ≤ 1.</li><li>Patient must meet the following laboratory values:</li><ol type=\"a\"><li>Serum total bilirubin ≤ 1.5 × ULN, (≤ 3.0 mg/dL for patients with Gilbert's syndrome);</li><li>Aspartate aminotransferase (AST) and alanine aminotransferase (ALT) ≤ 2.5 × ULN (≤ 5.0 × ULN for patients with hepatic metastasis);</li><li>Serum creatinine &lt; 1.5 x ULN or creatinine clearance (calculated* or measured value)</li><p>≥ 50 mL/min</p><p>*For calculated creatinine clearance (Clcr) value, the eligibility should be determined using the Cockcroft-Gault formula:<ul><li>Male Clcr (mL/mim) = body weight (kg) x (140-age) / [72 x creatinine (mg/dL)]</li><li>Female Clcr (mL/min) = male Clcr x 0.85</li></ul></p><li>Calcium (corrected for serum albumin) and magnesium within normal limits or ≤ grade 1 according to NCI-CTCAE version 5.0 if judged clinically not significant by the Investigator;</li><li>Potassium within normal limits, or corrected with supplements;</li><li>Platelets ≥ 100 x 109/L;</li><li>Hemoglobin (Hgb) ≥ 10 g/dL;</li><li>Absolute neutrophil count (ANC) ≥ 1.5 x 109/L;</li><li>International normalized ratio (INR) &lt; 1.5 (or &lt; 3.0 if on anticoagulation);</li><li>Fasting plasma glucose (FPG) ≤ 100 mg/dL (6.1 mmol/L) and Glycosylated Hemoglobin (HbA1c) ≤ 5.7% (both criteria have to be met);</li><li>Fasting serum amylase ≤ 2 × ULN;</li><li>Fasting serum lipase ≤ ULN</li></ol></ol><p>Exclusion Criteria:</p><ul><li>Patients eligible for this study must not meet any of the following criteria:</li><ol><li>Patient has received any anticancer therapy (including chemotherapy, targeted therapy, hormonal therapy, biotherapy, immunotherapy, or other investigational agents.) within 28 days or 5 times of half-lives (whichever is shorter) prior to the first dose of the study treatment or who have not recovered from the side effect of such therapy.</li><li>Patients with contraindication to olaparib treatment or who did not tolerate olaparib previously.</li><li>Patients who had prior treatment with PARP inhibitor, PI3Kα inhibitor, AKT inhibitor or mTOR inhibitor (Part 2 dose expansion cohort 1&amp; 2 only).</li><li>Radical radiation therapy (including radiation therapy for over 25% bone marrow) within 4 weeks prior to the first dose of the investigational product or received local palliative radiation therapy for bone metastases within 2 weeks.</li><li>Any toxicities from prior treatment that have not recovered to baseline or ≤ CTCAE Grade 1 before the start of study treatment, with exception of hair loss.</li><li>Patients who have been treated with any hematopoietic colony-stimulating growth factors (e.g., G-CSF, GM-CSF) ≤ 2 weeks prior to starting study drug. Erythropoietin or darbepoetin therapy, if initiated at least 2 weeks prior to enrollment, may be continued (Part 1 dose escalation only).</li><li>Patients who have symptomatic CNS metastasis which is neurologically unstable or those who have CNS disease requiring increase in the dose of steroid. (Note: Patients withcontrolled CNS metastasis can participate in the trial. Before entering the study, patientsshould have finished radiotherapy, or have received operation for CNS tumor metastasis at least two weeks before. Patients' neurological function must be in a stable state; no newneurological deficit is found during clinical examination and no new problem is found during CNS imaging examinations. If patients need to use steroids to treat CNS metastasis, the therapeutic dose of steroid should be stable for ≥ 3 months at least two weeks prior to entering the study with treatment dose no more than dexamethasone 4 mg daily or anequivalent dose of steroids).</li><li>Patients with an established diagnosis of diabetes mellitus including steroid-induced diabetes mellitus.</li><li>Major surgery or had significant traumatic injury within 28 days prior to the first dose of the investigational product or has not recovered from major side effects.</li><li>Known HIV infection with a history of acquired immunodeficiency syndrome (AIDS)- defining opportunity infection within the past 12 months; active hepatitis B and hepatitis</li><p>C. Patients whose test results meet one of the following will not be enrolled:</p><ul><li>For patients in China, confirmed HIV antibody positive. For patients in the US, patients with a history of HIV but no history of AIDS or an AIDS-defining opportunistic infection are allowed to be enrolled;</li><li>Serum HBsAg positive and HBV DNA&gt;200 IU/ml or 1000 copies/mL;</li><li>Serum HCV antibody and HCV RNA positive.</li></ul><li>Patient has any other concurrent disease which had potential risk of insulin resistance (e.g., pancreatic disorders, acromegaly, Cushing's syndrome) or current use of medication with potential risk of insulin resistance.</li><li>Patient with pancreatic cancer.</li><li>Patient is currently receiving or has received systemic corticosteroids ≤ 2 weeks prior to starting study treatment, or who have not fully recovered from side effects of such treatment.</li><p>Note: The following uses of corticosteroids are permitted: single doses, topical applications (e.g., for rash), inhaled sprays (e.g., for obstructive airways diseases), eye drops or local injections (e.g., intra-articular).</p><li>Use of therapeutic doses of warfarin sodium (Coumadin®), or any other coumarinderivative anticoagulants. The administration of low-molecular weight heparin is allowed.</li><li>History of acute pancreatitis within 1 year of screening or past medical history of chronic pancreatitis.</li><li>Gastrointestinal condition which could impair absorption of study medication (e.g., ulcerative diseases, uncontrolled nausea, vomiting, diarrhea, malabsorption syndrome, or small bowel resection).</li><li>Patients with clinically significant cardiovascular disease, including:</li><ul><li>NYHA Class III or higher congestive heart failure;</li><li>History or current evidence of serious uncontrolled ventricular arrhythmias requiring drug therapy;</li><li>Acute myocardial infarction, severe or unstable angina pectoris, coronary artery or peripheral artery bypass graft received within 6 months prior to the first dose;</li><li>Left ventricular ejection fraction (LVEF) &lt; 50%;</li><li>Fridericia's corrected QT interval (QTcF) &gt; 460 ms on ECG conducted during screening;</li><li>Congenital long QT syndrome, or any known history of torsade de pointes (TdP), or family history of unexplained sudden death;</li><li>Clinically uncontrolled hypertension (after standard antihypertensive treatment, systolic blood pressure ≥ 140 mmHg and/or diastolic blood pressure ≥ 90 mmHg).</li></ul><li>Any diseases or medical conditions, at the Investigator's discretion, that may be unstable or influence their safety or study compliance, including organ transplantation, abuse of psychotropic medication, alcohol abuse or history of drug abuse.</li><li>Other serious illness or medical conditions at the Investigator's discretion, that may influence study results, including but not limited to serious infection, diabetes, cardiovascular and cerebrovascular diseases or lung disease.</li><li>Participation in a prior investigational treatment within 28 days prior to the start of study treatment or within 5 half-lives of the investigational product (whichever is no longer than 28 days).</li><li>Pregnant or breast-feeding patients. Pregnancy refers to the state of a woman between fertilization and the end of pregnancy confirmed by positive laboratory hCG test (&gt; 5 mIU/mL). Breast-feeding woman can become eligible for this study if she stops breastfeeding, however, cannot restart the breast-feeding on/after the completion of the study treatment.</li><li>Male and female of childbearing potential not using effective contraception (e.g.</li></ol></ul><p>intrauterine device (IUD), diaphragm with spermicide, cervical cap with spermicide, male condoms, female condoms with spermicide, oral hormonal contraceptive) during the trial and within 6 months after the end of treatment. Definition of child-bearing potential: a female that fulfills the one of the following criteria is considered to be without childbearing potential: spontaneous menopause for 12 consecutive months with appropriate clinical features (e.g. proper age, a history of vasomotor diseases, etc.), or a history of bilateral ovariectomy (with or without hysterectomy) or tubal ligation performed at least 6 weeks. For patients with amenorrhea due to anti-tumor agents, even amenorrhea over 12 months, a pregnancy test is necessary. If a female only received an ovariectomy, she will be considered as no childbearing potential only after confirmation by hormone levels.</p>",
 		},
-		{
+		{ // lots of standalone paragraphs
 			`        Inclusion Criteria:
 
         Inclusion Criteria For All Arms:
@@ -606,6 +612,209 @@ func getParseTests() []sample {
 
           7. Subjects receiving antiplatelet or anticoagulant therapies within 28 days of first
              dose of study drug.`, "<p>Inclusion Criteria:</p><p>Inclusion Criteria For All Arms:</p><ol><li>Diagnosis of relapsed/refractory aggressive Non Hodgkin's Lymphoma (NHL) with histology based on established World Health Organization (WHO) criteria.</li><li>Must have received ≥1 prior line of therapy for the treatment of current histology, there are no known curative treatment options available, or subject ineligible for potential curative options.</li><li>Presence of radiographically measurable lymphadenopathy or extranodal lymphoid malignancy. Not applicable for cutaneous lesions.</li><li>ECOG performance status of ≤2.</li></ol><p>Inclusion Criteria for Arm 1:</p><ol><li>Must have previously received rituximab, cyclophosphamide, doxorubicin hydrochloride (hydroxydaunorubicin), vincristine sulfate, and prednisone or equivalent regimen with stem-cell rescue. Or who are ineligible for highdose chemotherapy with stem-cell rescue and/or chimeric antigen receptor (CAR) T cell therapy.<p>Ineligibility for high-dose therapy with stem cell rescue and/or CAR T-cell therapy will be determined by the investigator.</p></li></ol><p>Inclusion Criteria for Arm 2:</p><ol><li>Must have previously received rituximab, cyclophosphamide, doxorubicin hydrochloride (hydroxydaunorubicin), vincristine sulfate, and prednisone or equivalent regimen with stem-cell rescue. Or who are ineligible for highdose chemotherapy with stem-cell rescue and/or chimeric antigen receptor (CAR) T-cell therapy.<p>Ineligibility for high-dose therapy with stem cell rescue and/or CAR T-cell therapy will be determined by the investigator.</p></li></ol><p>Inclusion Criteria for Arm 3:</p><ol><li>Must have previously received rituximab, cyclophosphamide, doxorubicin hydrochloride (hydroxydaunorubicin), vincristine sulfate, and prednisone or equivalent regimen with stem-cell rescue. Or who are ineligible for highdose chemotherapy with stem-cell rescue and/or chimeric antigen receptor (CAR) T cell therapy.<p>Ineligibility for high-dose therapy with stem cell rescue and/or CAR T-cell therapy will be determined by the investigator.</p></li></ol><p>Inclusion Criteria for Arm 4:</p><ol><li>Must have previously received rituximab, cyclophosphamide, doxorubicin hydrochloride (hydroxydaunorubicin), vincristine sulfate, and prednisone or equivalent regimen with stem-cell rescue. Or who are ineligible for highdose chemotherapy with stem-cell rescue and/or chimeric antigen receptor (CAR) T cell therapy.<p>Ineligibility for high-dose therapy with stem cell rescue and/or CAR T-cell therapy will be determined by the investigator.</p></li></ol><p>Exclusion Criteria:</p><p>Exclusion Criteria For All Arms:</p><ol><li>History of prior malignancy except for the following: a) Malignancy treated with curative intent and with no evidence of active disease present for more than 2 years before screening and felt to be at low risk for recurrence by treating physician, b) Adequately treated lentigo maligna melanoma without current evidence of disease or adequately controlled nonmelanomatous skin cancer, c) Adequately treated carcinoma in situ without current evidence of disease, d) Evidence of severe or uncontrolled systemic disease, or current unstable or uncompensated respiratory or cardiac conditions, or uncontrolled hypertension, history of, or active, bleeding diatheses or uncontrolled active systemic fungal, bacterial, viral, or other infection, or intravenous anti-infective treatment within 2 weeks before first dose of study treatment.</li><li>Serologic status reflecting active hepatitis B or C infection.</li><li>Prior use of standard antilymphoma therapy or radiation therapy within 14 days of receiving the first dose of study treatment (not including palliative radiotherapy or palliative corticosteroid use).</li><li>Requires ongoing immunosuppressive therapy, including systemic corticosteroids for treatment of lymphoid cancer or other conditions.</li><li>For subjects under DLT review only: Any haematopoietic growth factors or darbepoetin within 14 days of the first dose of study treatment.</li></ol><p>Exclusion Criteria for Arm 1:</p><ol><li>Presence of central nervous system (CNS) lymphoma or leptomeningeal disease.</li><li>Current refractory nausea and vomiting, malabsorption syndrome, disease significantly affecting gastrointestinal (GI) function, resection of the stomach, extensive small bowel resection that is likely to affect absorption, symptomatic inflammatory bowel disease, partial or complete bowel obstruction, or gastric restrictions and bariatric surgery, such as gastric bypass.</li><li>Requires treatment with proton-pump inhibitors.</li><li>Requires treatment with strong CYP3A inhibitors or inducers.</li></ol><p>Exclusion Criteria for Arm 2:</p><ol><li>Relative hypotension (&lt; 90/60 mm Hg) or clinically relevant orthostatic hypotension, including a fall in blood pressure of &gt;20 mm Hg.</li><li>Uncontrolled hypertension requiring clinical intervention.</li><li>At risk for brain perfusion problems based on medical history.</li><li>Mean resting QT interval (QTc) calculated using Fridericia's formula (QTcF) &gt;470 msec for female subjects and &gt;450 msec for male subjects obtained from 3 electrocardiograms (ECGs), or congenital long QT syndrome.</li><li>Presence of central nervous system (CNS) lymphoma or leptomeningeal disease.</li><li>Known to have tested positive for human immunodeficiency virus (HIV) &amp; requires treatment with restricted medications.</li><li>Current refractory nausea and vomiting, malabsorption syndrome, disease significantly affecting gastrointestinal (GI) function, resection of the stomach, extensive small bowel resection that is likely to affect absorption, symptomatic inflammatory bowel disease, partial or complete bowel obstruction, or gastric restrictions and bariatric surgery, such as gastric bypass.</li><li>Requires treatment with proton-pump inhibitors.</li></ol><p>Exclusion Criteria for Arm 3:</p><ol><li>Presence of central nervous system (CNS) lymphoma or leptomeningeal disease.</li><li>Current refractory nausea and vomiting, malabsorption syndrome, disease significantly affecting gastrointestinal (GI) function, resection of the stomach, extensive small bowel resection that is likely to affect absorption, symptomatic inflammatory bowel disease, partial or complete bowel obstruction, or gastric restrictions and bariatric surgery, such as gastric bypass.</li><li>Requires treatment with proton-pump inhibitors.</li><li>Red blood cell (RBC) transfusion dependence, defined as requiring more than 2 units of RBC transfusions during the 4-week period prior to screening.</li><li>History of haemolytic anaemia or Evans syndrome in the last 3 months before enrolment.</li><li>Positive IgG component of the direct antiglobulin test (DAT).</li><li>Prior treatment with CD47 or SIRPα-targeting agents.</li><li>Hypersensitivity to the active substance or to murine proteins, or to any of the other excipients of rituximab</li></ol><p>Exclusion Criteria for Arm 4:</p><ol><li>Presence of central nervous system (CNS) lymphoma or leptomeningeal disease.</li><li>Current refractory nausea and vomiting, malabsorption syndrome, disease significantly affecting gastrointestinal (GI) function, resection of the stomach, extensive small bowel resection that is likely to affect absorption, symptomatic inflammatory bowel disease, partial or complete bowel obstruction, or gastric restrictions and bariatric surgery, such as gastric bypass.</li><li>Requires treatment with proton-pump inhibitors.</li><li>Requires treatment with CYP3A inhibitors or inducers or substrates of drug transporters.</li><li>History of tuberculosis.</li><li>Mean resting corrected QT interval (QTcF) &gt;450 msec obtained from 3 electrocardiograms (ECGs); clinically important ECG findings, or risk factors for QTc prolongation.</li><li>Subjects receiving antiplatelet or anticoagulant therapies within 28 days of first dose of study drug.</li></ol>",
+		},
+		{ // a test that should fail
+			`        Inclusion Criteria:
+
+          -  1. Age ≥12 years and weight &gt;40 kg;
+
+             2. Histologically confirmed diagnosis per 2016 World Health Organization (WHO)
+             classification of lymphoid neoplasms160 and per the 2016 WHO classification of acute
+             leukemia161 of the following indications:
+
+             • DLBCL, including arising from follicular lymphoma;
+
+             • High-grade B-cell lymphoma;
+
+               -  MCL;
+
+               -  Primary mediastinal large B-cell lymphoma;
+
+               -  Primary DLBCL of the CNS;
+
+               -  Burkitt or Burkitt-like lymphoma/leukemia;
+
+               -  CLL/SLL; or
+
+               -  B-lymphoblastic leukemia/lymphoma, T-lymphoblastic leukemia/lymphoma, acute
+                  leukemia/lymphoma, acute leukemias of ambiguous lineage, or NK cell lymphoblastic
+                  leukemia/lymphoma;
+
+                  3. Patients must have R/R disease with prior therapies defined below:
+
+               -  DLBCL and high-grade B-cell lymphoma:
+
+                    1. R/R after autologous HCT; or
+
+                    2. R/R after CAR T therapy; or
+
+                    3. Ineligible for autologous HCT or CAR T therapy due to persistent disease,
+                       co-morbidity, or social issues (eg, lack of insurance, lack of caregiver,
+                       etc); or
+
+                    4. R/R after ≥2 lines of therapy including anti-20 antibody. Patients must have
+                       failed or are intolerant or ineligible for polatuzamab vedotin;
+
+               -  MCL:
+
+                    1. R/R after autologous HCT; or
+
+                    2. Ineligible for autologous HCT due to persistent disease, co-morbidity, or
+                       social issues (eg, lack of insurance, lack of caregiver, etc); or
+
+                    3. R/R after ≥2 lines of therapy including at least 1 of the following: a BTK
+                       inhibitor, bortezomib, or lenalidomide;
+
+               -  Primary mediastinal large B-cell lymphoma:
+
+                  a. R/R after ≥1 line of therapy; AVM Biotechnology, LLC. Clinical Study Protocol
+                  AVM0703-001 Confidential &amp; Proprietary Page 47 of 105 Version 1.0, 20 February
+                  2020
+
+               -  Primary DLBCL of the CNS:
+
+                  a. R/R after ≥1 line of therapy including methotrexate (unless intolerant to
+                  methotrexate);
+
+               -  Burkitt or Burkitt-like lymphoma/leukemia:
+
+                    1. R/R after autologous or allogeneic HCT; or
+
+                    2. Ineligible for autologous or allogeneic HCT due to persistent disease,
+                       co-morbidity, or social issues (eg, lack of insurance, lack of caregiver,
+                       etc);
+
+               -  CLL/SLL:
+
+                    1. R/R after autologous or allogeneic HCT; or
+
+                    2. Ineligible for autologous or allogeneic HCT due to persistent disease,
+                       co-morbidity, or social issues (eg, lack of insurance, lack of caregiver,
+                       etc); or
+
+                    3. R/R after ≥2 lines of therapy including at least 1 of the following: a BTK
+                       inhibitor, ventoclax, idelalisib, or duvelisib;
+
+               -  ALL:
+
+                    1. R/R after autologous or allogeneic HCT; or
+
+                    2. Ineligible for allogeneic HCT due to persistent disease, co-morbidity, or
+                       social issues (eg, lack of insurance, lack of caregiver, etc); or
+
+                    3. R/R according to the following disease-specific specifications:
+
+               -  B-cell lymphoblastic leukemia/lymphoma: ≥2 lines of therapy including approved
+                  CAR T cell therapies, inotuzumab, ozogamicin, or blinatumomab; or
+
+               -  T-cell lymphoblastic leukemia/lymphoma: Patients must have failed nelarabine; or
+
+               -  NK cell lymphoblastic leukemia/lymphoma: R/R after ≥1 line of therapy;
+
+                  4. Lansky (12 to 15 years of age) (Appendix G) or Karnofsky (≥16 years of age)
+                  (Appendix H) performance status ≥50;
+
+                  5. Screening laboratory values that meet all of the following criteria:
+
+               -  Absolute neutrophil count ≥0.5 × 109/L;
+
+               -  Platelet count &gt;50 × 109/L;
+
+               -  Hemoglobin ≥8.0 g/dL;
+
+               -  Aspartate aminotransferase or alanine aminotransferase ≤2.5 × ULN, unless due to
+                  the disease;
+
+               -  Total bilirubin ≤1.5 × ULN (if secondary to Gilbert's syndrome, ≤3 × ULN is
+                  permitted), unless due to the disease; and
+
+               -  Serum creatinine ≤1.5 × ULN or glomerular filtration rate ≥50 mL/min (calculated
+                  from a 24-hour urine collection);
+
+                  6. Minimum level of pulmonary reserve defined as &lt;Grade 2 dyspnea and pulse
+                  oximetry ≥92% on room air;
+
+                  7. Females of childbearing potential must have a negative serum pregnancy test at
+                  screening. Females of childbearing potential and nonsterile males must agree to
+                  use medically effective methods of contraception from the time of informed
+                  consent/assent through 1 month after study drug infusion, which must, at a
+                  minimum, include a barrier method; and
+
+                  8. The ability to understand and willingness to sign a written informed consent
+                  form (ICF) and the ability to adhere to the study schedule and prohibitions.
+                  Patients under the age of 18 years (or other age as defined by regional law or
+                  regulation) must be willing and able to provide written assent and have a
+                  parent(s) or guardian(s) willing and able to provide written, signed informed
+                  consent after the nature of the study has been explained and prior to performance
+                  of any study-related procedure.
+
+        Exclusion Criteria:
+
+          -  Patients who meet any of the following criteria will be excluded from participation in
+             the study:
+
+               1. History of another malignancy, except for the following:
+
+                    -  Adequately treated local basal cell or squamous cell carcinoma of the skin;
+
+                    -  Adequately treated carcinoma in situ without evidence of disease;
+
+                    -  Adequately treated papillary, noninvasive bladder cancer; or
+
+                    -  Other cancer that has been in complete remission for ≥2 years. Patients with
+                       low-grade prostate cancer, on active surveillance, and not expected to
+                       clinically progress over 2 years are allowed;
+
+               2. Significant cardiovascular disease (eg, myocardial infarction, arterial
+                  thromboembolism, cerebrovascular thromboembolism) within 3 months prior to the
+                  start of AVM0703 administration, angina requiring therapy, symptomatic peripheral
+                  vascular disease, New York Heart Association Class III or IV congestive heart
+                  failure, left ventricular ejection fraction &lt;30%, left ventricular fractional
+                  shortening &lt;20%, or uncontrolled ≥Grade 3 hypertension (diastolic blood pressure
+                  [DBP] ≥100 mmHg or systolic blood pressure [SBP] ≥150 mmHg) despite
+                  antihypertensive therapy for patients ≥18 years of age, or uncontrolled stage 2
+                  hypertension (DBP ≥90 mmHg or SBP ≥140 mmHg) despite antihypertensive therapy for
+                  patients ≥12 years of age;
+
+               3. Significant screening electrocardiogram (ECG) abnormalities, including unstable
+                  cardiac arrhythmia requiring medication, atrial fibrillation/flutter, left
+                  bundle-branch block, second-degree atrioventricular (AV) block type 2,
+                  third-degree AV block, ≥Grade 2 bradycardia, or heart rate corrected QT interval
+                  using Fridericia's formula average of triplicate ECGs &gt;450 msec;
+
+               4. Known gastric or duodenal ulcer;
+
+               5. Uncontrolled type 1 or type 2 diabetes;
+
+               6. Known hypersensitivity or allergy to the study drug or any of its excipients;
+
+               7. Untreated ongoing bacterial, fungal, or viral infection (including upper
+                  respiratory tract infections) at the start of AVM0703 administration, including
+                  the following:
+
+                    -  Positive hepatitis B surface antigen and/or hepatitis B core antibody test
+                       plus a positive hepatitis B polymerase chain reaction (PCR) assay. Patients
+                       with a negative PCR assay are permitted with appropriate antiviral
+                       prophylaxis;
+
+                    -  Positive hepatitis C virus antibody (HCV Ab) test. Patients with a positive
+                       HCV Ab test are eligible if they are negative for hepatitis C virus by PCR;
+
+                    -  Positive human immunodeficiency virus (HIV) antibody test with detectable
+                       HIV load by PCR, or the patient is not able to tolerate antiretroviral
+                       therapy; or
+
+                    -  Positive testing for tuberculosis during screening;
+
+               8. Received live vaccination within 8 weeks of screening;
+
+               9. Pregnant or breastfeeding;
+
+              10. Concurrent participation in another therapeutic clinical study; or
+
+              11. Manic-depressive disorder, schizophrenia, or a history of severe depression or
+                  substance abuse.
+`, "Not parsable",
 		},
 	}
 }
