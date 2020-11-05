@@ -1,11 +1,14 @@
 package ctgov
 
+import "strconv"
+
 // node is a blob struct for storing relevant parsing metadata about a line in file
 type node struct {
 	level     int // number of and tabs before line (space counts as 1, tab as 4)
 	textStart int // actualStart + numbering / dashing characters
 	lineType
 	htmlType
+	numberingValue int
 }
 
 // newNode initiates a node instance.
@@ -15,10 +18,11 @@ func newNode(level int, t lineType, hType htmlType) *node {
 }
 
 // calcNodeProps calculates relevant parsing metadata of line
-func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
+func calcNodeProps(line []byte, lastNode *node) (lineType, int, int) {
 
 	var retType = unkLine
 	var start int
+	var end int
 	var textStart int
 
 	if len(line) > 0 {
@@ -29,7 +33,7 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 				continue
 
 			} else if c >= '1' && c <= '9' {
-				if retType == unkLine { // still dont know, check to see if its number line
+				if retType == unkLine { // still dont know, check to see if its a number line
 					for j := i; j < len(line); j++ {
 						var cc = line[j]
 
@@ -38,7 +42,8 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 
 						} else if cc == '.' {
 							start = i
-							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a numbering
+							end = j
+							if lastNode.lineType == emptyLine || lastNode.lineType == unkLine { // a text line might start with a numbering as text
 								retType = numberLine
 							} else {
 								retType = textLine
@@ -93,7 +98,13 @@ func calcNodeProps(line []byte, lastNode *node) (lineType, int) {
 		retType = emptyLine
 	}
 
-	return retType, textStart
+	numberingValue := 0
+
+	if retType == numberLine {
+		numberingValue, _ = strconv.Atoi(string(line[start:end]))
+	}
+
+	return retType, textStart, numberingValue
 }
 
 // calcLevel determines line "level" which is the number of indentations before the actual text is.
