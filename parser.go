@@ -18,7 +18,7 @@ func NewParser() *Parser {
 // Parse iterates over ctgov criteria section, builds html presentation of that data and returns as buffer.
 // HTML output structure consists of indentation and small irregularities found during testing.
 // The tree is built along the way while the tree stack is managed dynamicly.
-func (pa *Parser) Parse(r io.Reader) []byte {
+func (pa *Parser) Parse(r io.Reader) ([]byte, error) {
 
 	var (
 		buffer     bytes.Buffer
@@ -28,15 +28,17 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 	// Add empty root node
 	formerNode = newNode(0, unkLine, unk)
+	formerNode.numberingValue = 0
 	treeStack = append(treeStack, formerNode)
 
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
-		lType, textStart := calcNodeProps(line, formerNode)
+		lType, tStart, nValue := calcNodeProps(line, formerNode)
 		n := newNode(calcLevel(line), lType, calcHTMLType(lType)) // level is the indentation counter before text starts.
-		n.textStart = textStart
+		n.textStart = tStart
+		n.numberingValue = nValue
 
 		switch n.lineType {
 
@@ -104,6 +106,11 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 
 			if n.level > treeStack[len(treeStack)-1].level {
 				// indent forward
+
+				if n.lineType == numberLine && n.numberingValue != 1 { // new list must start with a "1."
+					return nil, ErrNotParseable
+				}
+
 				// in every second consecutive numbering indent, make the ol element an "a, b, c" ordered list.
 				if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine {
 					writeOpenTag("ol type=\"a\"", &buffer)
@@ -115,12 +122,6 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 				writeOpenTag(htmlTypes[li], &buffer)
 				buffer.Write(line[n.textStart:]) // write text found only after indentation and node numbering
 
-			} else if n.level == treeStack[len(treeStack)-1].level { // text is indented the same
-				// write line as a item in current open list.
-				n.htmlType = li
-				writeOpenTag(htmlTypes[n.htmlType], &buffer)
-				buffer.Write(line[n.textStart:])
-
 			} else { // has lower level, indent backwards
 
 				for len(treeStack) > 1 { // continue popping items until reaching first parent node (lowest level possible), meant to prevent popping of root node
@@ -131,9 +132,26 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 						treeStack = treeStack[:len(treeStack)-1]
 
 					} else { // reached back to correct level, write item in list.
-						n.htmlType = li
-						writeOpenTag(htmlTypes[n.htmlType], &buffer)
-						buffer.Write(line[n.textStart:])
+
+						if n.lineType == numberLine &&
+							treeStack[len(treeStack)-1].lineType == numberLine &&
+							n.numberingValue == treeStack[len(treeStack)-1].numberingValue+1 || // if numbering text is not the next expected numbering in the list (1..2..3), raise an error.
+
+							n.lineType == dashLine { // dash lines dosen't have order
+
+							n.htmlType = li
+							writeOpenTag(htmlTypes[n.htmlType], &buffer)
+							buffer.Write(line[n.textStart:])
+
+							if treeStack[len(treeStack)-1].lineType == numberLine && n.lineType == numberLine { // making sure parser wont override unwanted values
+								treeStack[len(treeStack)-1].numberingValue = treeStack[len(treeStack)-1].numberingValue + 1 // because parser stores only parent nodes, need to progress numbering value.
+							}
+
+						} else {
+
+							return nil, ErrNotParseable
+
+						}
 
 						break
 					}
@@ -151,7 +169,7 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		formerNode = n
 
 	}
-	// Close all open html tags.
+
 	// closing open li tag if present
 	if treeStack[len(treeStack)-1].lineType == numberLine || treeStack[len(treeStack)-1].lineType == dashLine {
 		writeCloseTag(htmlTypes[li], &buffer)
@@ -163,5 +181,5 @@ func (pa *Parser) Parse(r io.Reader) []byte {
 		treeStack = treeStack[:len(treeStack)-1]
 	}
 
-	return buffer.Bytes()
+	return buffer.Bytes(), nil
 }
