@@ -10,10 +10,11 @@ This is a parser written in Go for the eligibility criteria section in [CTgov]([
 ## Usage example:
     p := ctgov.NewParser()
     ctString := strings.NewReader("some ct gov criteria")
-    ret, err := p.Parse(ctString)
-    if ret != nil {
-        fmt.Print(string(ret))
+    b, err := p.Parse(ctString)
+    if err != nil {
+        fmt.Printf("error occured: [%s], err)
     }
+    fmt.Print(string(b))
     
 
 ## General flow
