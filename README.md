@@ -1,4 +1,5 @@
-# CTgov Parser
+# CTgov Eligibility Criteria Parser
+This is a parser written in Go for the eligibility criteria section in [CTgov]([url](https://clinicaltrials.gov/)).
 
 ## How to install
     
@@ -15,7 +16,7 @@
     }
     
 
-## Parser flow (macro):
+## General flow
 
 1. Reads line by line from input buffer.
 
