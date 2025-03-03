@@ -8,6 +8,11 @@ This is a parser written in Go for the eligibility criteria section in [CTgov]([
 2. Should now be available for import.
 
 ## Usage example:
+
+    import (
+        ctgov github.com/nit4y/ctgov-eligibility-parser
+    )
+    ...
     p := ctgov.NewParser()
     ctString := strings.NewReader("some ct gov criteria")
     b, err := p.Parse(ctString)
