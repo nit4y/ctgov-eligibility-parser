@@ -1,4 +1,8 @@
 # CTgov Eligibility Criteria Parser
+[![Go Reference](https://pkg.go.dev/badge/github.com/nit4y/ctgov-eligibility-parser.svg)](https://pkg.go.dev/github.com/nit4y/ctgov-eligibility-parser)
+[![Build Status](https://github.com/nit4y/ctgov-eligibility-parser/actions/workflows/go.yml/badge.svg)](https://github.com/nit4y/ctgov-eligibility-parser/actions/workflows/go.yml)
+[![License](https://img.shields.io/github/license/nit4y/ctgov-eligibility-parser)](https://github.com/nit4y/ctgov-eligibility-parser/blob/main/LICENSE)
+
 This is a parser written in Go for the eligibility criteria section in [CTgov]([url](https://clinicaltrials.gov/)).
 
 ## How to install
